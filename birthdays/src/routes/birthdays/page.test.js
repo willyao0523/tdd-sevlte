@@ -13,4 +13,9 @@ describe('/birthdays', () => {
 		expect(screen.queryByText('Hercules')).toBeVisible();
 		expect(screen.queryByText('Athena')).toBeVisible();
 	});
+
+	it('displays a form of adding new birthdays', () => {
+		render(Page, { data: { birthdays } });
+		expect(screen.getByRole('form')).toBeVisible();
+	});
 });
