@@ -18,4 +18,12 @@ describe('/birthdays', () => {
 		render(Page, { data: { birthdays } });
 		expect(screen.getByRole('form')).toBeVisible();
 	});
+
+	it('passes any form information to the BirthdayForm', () => {
+		render(Page, {
+			data: { birthdays },
+			form: { error: 'An error' }
+		});
+		expect(screen.queryByText('An error')).toBeVisible();
+	});
 });

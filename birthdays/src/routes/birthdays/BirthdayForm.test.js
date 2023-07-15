@@ -27,6 +27,11 @@ describe('BirthdayForm', () => {
 			expect(field).toBeVisible();
 			expect(field.name).toEqual('name');
 		});
+
+		it('initially has a blank value', () => {
+			render(BirthdayForm);
+			expect(screen.getByLabelText('Name')).toHaveValue('');
+		});
 	});
 
 	describe('date of birth field', () => {
@@ -38,5 +43,41 @@ describe('BirthdayForm', () => {
 			expect(field).toBeVisible();
 			expect(field.name).toEqual('dob');
 		});
+
+		it('initially has a blank value', () => {
+			render(BirthdayForm);
+			expect(screen.getByLabelText('Name')).toHaveValue('');
+		});
+	});
+});
+
+describe('validation errors', () => {
+	it('display a message', () => {
+		render(BirthdayForm, {
+			form: {
+				error: 'An error'
+			}
+		});
+		expect(screen.queryByText('An error')).toBeVisible;
+	});
+
+	it('keeps the previous name value when an error occurs', () => {
+		render(BirthdayForm, {
+			form: {
+				name: 'Hercules',
+				error: 'Some awful error message'
+			}
+		});
+		expect(screen.queryByLabelText('Name')).toHaveValue('Hercules');
+	});
+
+	it('keeps the previews dob value when an error occurs', () => {
+		render(BirthdayForm, {
+			form: {
+				dob: '1994-01-01',
+				error: 'Some awful error message'
+			}
+		});
+		expect(screen.queryByLabelText('Date of birth')).toHaveValue('1994-01-01');
 	});
 });
