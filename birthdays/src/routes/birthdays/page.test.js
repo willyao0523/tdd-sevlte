@@ -3,18 +3,16 @@ import { render, screen } from '@testing-library/svelte';
 import { click } from '@testing-library/user-event';
 import Page from './+page.svelte';
 
+import { createBirthday } from 'src/factories/birthday';
+
 describe('/birthdays', () => {
 	const birthdays = [
-		{
-			id: '123',
-			name: 'Hercules',
-			dob: '1994-02-02'
-		},
-		{
-			id: '234',
-			name: 'Athena',
-			dob: '1989-01-01'
-		}
+		createBirthday('Hercules', '1994-02-02', {
+			id: '123'
+		}),
+		createBirthday('Athena', '1989-01-01', {
+			id: '234'
+		})
 	];
 
 	it('displays all the birthdays passed to it', () => {
@@ -95,17 +93,15 @@ describe('/birthdays', () => {
 		render(Page, {
 			data: {
 				birthdays: [
-					{
-						id: '123',
-						name: 'Hercules',
-						dob: '1994-02-02'
-					}
+					createBirthday('Hercules', '1994-02-02', {
+						id: '123'
+					})
 				]
 			},
 			form: {
-				id: '123',
-				name: 'Hercules',
-				dob: 'bad dob',
+				...createBirthday('Hercules', 'bad dob', {
+					id: '123'
+				}),
 				error: 'An error'
 			}
 		});

@@ -2,6 +2,13 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { createFormDataRequest } from 'src/factories/formDataRequest.js';
 import { load, actions } from './+page.server.js';
 import * as birthdayRepository from '$lib/server/birthdayRepository.js';
+import { createBirthday } from 'src/factories/birthday.js';
+
+const performFormAction = (formData) => {
+	return actions.default({
+		request: createFormDataRequest(formData)
+	});
+};
 
 describe('/birthdays - load', () => {
 	it('returns a fixture of two items', () => {
@@ -25,12 +32,7 @@ describe('/birthdays - default action', () => {
 	const storedId = () => birthdayRepository.getAll()[0].id;
 
 	it('adds a new birthday into the list', async () => {
-		const request = createFormDataRequest({
-			name: 'Zeus',
-			dob: '2009-02-02'
-		});
-
-		await actions.default({ request });
+		await performFormAction(createBirthday('Zeus', '2009-02-02'));
 
 		expect(birthdayRepository.getAll()).toContainEqual(
 			expect.objectContaining({
@@ -41,13 +43,10 @@ describe('/birthdays - default action', () => {
 	});
 
 	it('saves unique ids onto each new birthday', async () => {
-		const request = createFormDataRequest({
-			name: 'Zeus',
-			dob: '2009-02-02'
-		});
+		const request = createBirthday('Zeus', '2009-02-02');
 
-		await actions.default({ request });
-		await actions.default({ request });
+		await performFormAction(request);
+		await performFormAction(request);
 
 		expect(birthdayRepository.getAll()[0].id).not.toEqual(
 			birthdayRepository.getAll()[1].id
@@ -55,18 +54,12 @@ describe('/birthdays - default action', () => {
 	});
 
 	it('updates an entry that shares the same id', async () => {
-		let request = createFormDataRequest({
-			name: 'Zeus',
-			dob: '2009-02-02'
-		});
-		await actions.default({ request });
-
-		request = createFormDataRequest({
-			id: storedId(),
-			name: 'Zeus Ex',
-			dob: '2007-02-02'
-		});
-		await actions.default({ request });
+		await performFormAction(createBirthday('Zeus', '2009-02-02'));
+		await performFormAction(
+			createBirthday('Zeus Ex', '2007-02-02', {
+				id: storedId()
+			})
+		);
 
 		expect(birthdayRepository.getAll()).toHaveLength(1);
 		expect(birthdayRepository.getAll()).toContainEqual({
@@ -81,12 +74,7 @@ describe('/birthdays - default action', () => {
 			let result;
 
 			beforeEach(async () => {
-				const request = createFormDataRequest({
-					name: '',
-					dob: '2009-02-02'
-				});
-
-				result = await actions.default({ request });
+				result = await performFormAction(createBirthday('', '2009-02-02'));
 			});
 
 			it('does not save the birthday', () => {
@@ -117,12 +105,7 @@ describe('/birthdays - default action', () => {
 			let result;
 
 			beforeEach(async () => {
-				const request = createFormDataRequest({
-					name: 'Hercules',
-					dob: 'unknown'
-				});
-
-				result = await actions.default({ request });
+				result = await performFormAction(createBirthday('Hercules', 'unknown'));
 			});
 
 			it('does not save the birthday', () => {
@@ -156,13 +139,11 @@ describe('/birthdays - default action', () => {
 			let result;
 
 			beforeEach(async () => {
-				const request = createFormDataRequest({
-					id: 'unknown',
-					name: 'Hercules',
-					dob: '2009-01-02'
-				});
-
-				result = await actions.default({ request });
+				result = await performFormAction(
+					createBirthday('Hercules', '2009-01-02', {
+						id: 'unknown'
+					})
+				);
 			});
 
 			it('does not save the birthday', () => {
@@ -186,38 +167,26 @@ describe('/birthdays - default action', () => {
 
 	describe('when replacing an item', () => {
 		beforeEach(async () => {
-			let request = createFormDataRequest({
-				name: 'Zeus',
-				dob: '2009-02-02'
-			});
-			await actions.default({ request });
+			await performFormAction(createBirthday('Hercules', '2009-01-02'));
 		});
 
 		it('returns the id when an empty name is provided', async () => {
-			const request = createFormDataRequest({
-				id: storedId(),
-				name: '',
-				dob: '1982-05-01'
-			});
-
-			const result = await actions.default({
-				request
-			});
+			const result = await performFormAction(
+				createBirthday('', '1985-05-01', {
+					id: storedId()
+				})
+			);
 			expect(result.data).toContain({
 				id: storedId()
 			});
 		});
 
 		it('returns the id when an empty date of birth is provided', async () => {
-			const request = createFormDataRequest({
-				id: storedId(),
-				name: 'Hercules',
-				dob: ''
-			});
-
-			const result = await actions.default({
-				request
-			});
+			const result = await performFormAction(
+				createBirthday('Hercules', '', {
+					id: storedId()
+				})
+			);
 			expect(result.data).toContain({
 				id: storedId()
 			});

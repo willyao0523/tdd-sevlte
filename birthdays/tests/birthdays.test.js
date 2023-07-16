@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { BirthdayListPage } from './BirthdayListPage';
 
 test('lists all birthdays', async ({ page }) => {
 	await page.goto('/birthdays');
@@ -28,23 +29,15 @@ test('does not save birthday if there are validation errors', async ({
 });
 
 test('edit a birthday', async ({ page }) => {
-	await page.goto('/birthdays');
-	await page.getByLabel('Name').fill('Ares');
-	await page.getByLabel('Date of birth').fill('1985-01-01');
-	await page.getByRole('button', { name: 'Save' }).click();
+	const birthdayListPage = new BirthdayListPage(page);
+	await birthdayListPage.goto('/birthdays');
+	await birthdayListPage.saveNameAndDateOfBirth('Ares', '1985-01-01');
 
-	await page
-		.getByRole('listitem')
-		.filter({ hasText: 'Ares' })
-		.getByRole('button', { name: 'Edit' })
-		.click();
-	await page.getByLabel('Date of birth').fill('1995-01-01');
-	await page.getByRole('button', { name: 'Save' }).click();
+	await birthdayListPage.beginEditingFor('Ares');
+	await birthdayListPage.saveNameAndDateOfBirth('Ares', '1995-01-01');
 
-	await expect(
-		page.getByRole('listitem').filter({ hasText: 'Ares' })
-	).not.toContainText('1985-01-01');
-	await expect(
-		page.getByRole('listitem').filter({ hasText: 'Ares' })
-	).toContainText('1995-01-01');
+	await expect(birthdayListPage.entryFor('Ares')).not.toContainText(
+		'1985-01-01'
+	);
+	await expect(birthdayListPage.entryFor('Ares')).toContainText('1995-01-01');
 });
