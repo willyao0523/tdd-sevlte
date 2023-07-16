@@ -1,14 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createFormDataRequest } from 'src/factories/formDataRequest.js';
+import { createBirthday } from 'src/factories/birthday.js';
 import { load, actions } from './+page.server.js';
 import * as birthdayRepository from '$lib/server/birthdayRepository.js';
-import { createBirthday } from 'src/factories/birthday.js';
-
-const performFormAction = (formData) => {
-	return actions.default({
-		request: createFormDataRequest(formData)
-	});
-};
 
 describe('/birthdays - load', () => {
 	it('returns a fixture of two items', () => {
@@ -31,6 +25,11 @@ describe('/birthdays - default action', () => {
 
 	const storedId = () => birthdayRepository.getAll()[0].id;
 
+	const performFormAction = (formData) =>
+		actions.default({
+			request: createFormDataRequest(formData)
+		});
+
 	it('adds a new birthday into the list', async () => {
 		await performFormAction(createBirthday('Zeus', '2009-02-02'));
 
@@ -44,7 +43,6 @@ describe('/birthdays - default action', () => {
 
 	it('saves unique ids onto each new birthday', async () => {
 		const request = createBirthday('Zeus', '2009-02-02');
-
 		await performFormAction(request);
 		await performFormAction(request);
 
@@ -86,16 +84,9 @@ describe('/birthdays - default action', () => {
 				);
 			});
 
-			it('returns a 422', () => {
-				expect(result.status).toEqual(422);
-			});
-
-			it('returns a useful message', () => {
-				expect(result.data.error).toEqual('Please provide a name.');
-			});
-
-			it('returns the other data back', () => {
-				expect(result.data).toContain({
+			it('returns a complete error response', () => {
+				expect(result).toBeUnprocessableEntity({
+					error: 'Please provide a name.',
 					dob: '2009-02-02'
 				});
 			});
@@ -117,18 +108,9 @@ describe('/birthdays - default action', () => {
 				);
 			});
 
-			it('returns a 422', () => {
-				expect(result.status).toEqual(422);
-			});
-
-			it('returns a useful message', () => {
-				expect(result.data.error).toEqual(
-					'Please provide a date of birth in the YYYY-MM-DD format.'
-				);
-			});
-
-			it('returns all data back, including the incorrect value', () => {
-				expect(result.data).toContain({
+			it('returns a complete error response', () => {
+				expect(result).toBeUnprocessableEntity({
+					error: 'Please provide a date of birth in the YYYY-MM-DD format.',
 					name: 'Hercules',
 					dob: 'unknown'
 				});
@@ -155,12 +137,10 @@ describe('/birthdays - default action', () => {
 				);
 			});
 
-			it('returns a 422', () => {
-				expect(result.status).toEqual(422);
-			});
-
-			it('returns a useful message', () => {
-				expect(result.data.error).toEqual('An unknown ID was provided.');
+			it('returns a complete error response', () => {
+				expect(result).toBeUnprocessableEntity({
+					error: 'An unknown ID was provided.'
+				});
 			});
 		});
 	});
@@ -172,11 +152,12 @@ describe('/birthdays - default action', () => {
 
 		it('returns the id when an empty name is provided', async () => {
 			const result = await performFormAction(
-				createBirthday('', '1985-05-01', {
+				createBirthday('', '1982-05-01', {
 					id: storedId()
 				})
 			);
-			expect(result.data).toContain({
+
+			expect(result).toBeUnprocessableEntity({
 				id: storedId()
 			});
 		});
@@ -187,7 +168,8 @@ describe('/birthdays - default action', () => {
 					id: storedId()
 				})
 			);
-			expect(result.data).toContain({
+
+			expect(result).toBeUnprocessableEntity({
 				id: storedId()
 			});
 		});
