@@ -7,6 +7,10 @@
 {/if}
 
 <form method="post" name="birthday">
+    {#if form?.id}
+        <input type="hidden" name="id" value={form.id} />
+    {/if}
+    
     <label>Name <input type="text" name="name" value={form?.name || ''} /></label>
     <label>Date of birth <input type="text" name="dob" value={form?.dob || ''} /></label>
     <input type="submit" value="Save" />

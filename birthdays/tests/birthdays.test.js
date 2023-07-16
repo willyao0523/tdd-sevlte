@@ -10,7 +10,7 @@ test('saves a new birthday', async ({ page }) => {
 	await page.goto('/birthdays');
 	await page.getByLabel('Name').fill('Persephone');
 	await page.getByLabel('Date of birth').fill('1987-09-03');
-	await page.getByRole('button').click();
+	await page.getByRole('button', { name: 'Save' }).click();
 	await expect(page.getByText('Persephone')).toBeVisible();
 });
 
@@ -20,9 +20,31 @@ test('does not save birthday if there are validation errors', async ({
 	await page.goto('/birthdays');
 	await page.getByLabel('Name').fill('Demeter');
 	await page.getByLabel('Date of birth').fill('invalid');
-	await page.getByRole('button').click();
+	await page.getByRole('button', { name: 'Save' }).click();
 	await expect(page.getByText('Demeter')).not.toBeVisible();
 	await expect(
 		page.getByText('Please provide a date of birth in the YYYY-MM-DD format.')
 	).toBeVisible();
+});
+
+test('edit a birthday', async ({ page }) => {
+	await page.goto('/birthdays');
+	await page.getByLabel('Name').fill('Ares');
+	await page.getByLabel('Date of birth').fill('1985-01-01');
+	await page.getByRole('button', { name: 'Save' }).click();
+
+	await page
+		.getByRole('listitem')
+		.filter({ hasText: 'Ares' })
+		.getByRole('button', { name: 'Edit' })
+		.click();
+	await page.getByLabel('Date of birth').fill('1995-01-01');
+	await page.getByRole('button', { name: 'Save' }).click();
+
+	await expect(
+		page.getByRole('listitem').filter({ hasText: 'Ares' })
+	).not.toContainText('1985-01-01');
+	await expect(
+		page.getByRole('listitem').filter({ hasText: 'Ares' })
+	).toContainText('1995-01-01');
 });

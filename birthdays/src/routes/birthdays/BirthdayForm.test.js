@@ -49,6 +49,18 @@ describe('BirthdayForm', () => {
 			expect(screen.getByLabelText('Name')).toHaveValue('');
 		});
 	});
+
+	describe('id field', () => {
+		it('contains a hidden field for the id if an id is given', () => {
+			render(BirthdayForm, { form: { id: '123' } });
+			expect(document.forms.birthday.elements.id.value).toEqual('123');
+		});
+
+		it('does not include the id field if no id is present', () => {
+			render(BirthdayForm);
+			expect(document.forms.birthday.elements.id).not.toBeDefined();
+		});
+	});
 });
 
 describe('validation errors', () => {
