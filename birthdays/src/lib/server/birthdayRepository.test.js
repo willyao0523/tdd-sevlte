@@ -123,7 +123,7 @@ describe('birthdayRepository', () => {
 				expect(
 					replace('234', createBirthday('Hercules', '2009-01-02'))
 				).toEqual({
-					error: 'An unknown ID was provided'
+					error: 'An unknown ID was provided.'
 				});
 			});
 		});

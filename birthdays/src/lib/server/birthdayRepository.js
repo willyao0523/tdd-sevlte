@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 
-let db = new Map();
+const db = new Map();
 
 export const addNew = (item) => {
 	const validationResult = validate(item);
@@ -16,11 +16,7 @@ export const getAll = () => Array.from(db.values());
 export const clear = () => db.clear();
 
 export const replace = (id, item) => {
-	if (!has(id)) {
-		return {
-			error: 'An unknown ID was provided'
-		};
-	}
+	if (!has(id)) return { error: 'An unknown ID was provided.' };
 
 	const validationResult = validate(item);
 	if (validationResult) {
@@ -31,11 +27,6 @@ export const replace = (id, item) => {
 };
 
 export const has = (id) => db.has(id);
-
-const empty = (value) =>
-	value === undefined || value === null || value.trim() === '';
-
-const invalidDob = (dob) => isNaN(Date.parse(dob));
 
 const validate = ({ name, dob }) => {
 	if (empty(name)) {
@@ -54,3 +45,8 @@ const set = (id, item) => {
 	db.set(id, itemWithId);
 	return itemWithId;
 };
+
+const empty = (value) =>
+	value === undefined || value === null || value.trim() === '';
+
+const invalidDob = (dob) => isNaN(Date.parse(dob));
